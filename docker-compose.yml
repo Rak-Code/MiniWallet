@@ -1,0 +1,47 @@
+version: '3.9'
+
+services:
+  mini-wallet:
+    image: mini-wallet:latest
+    container_name: mini-wallet
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/mini_wallet?useSSL=false&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+      SPRING_REDIS_HOST: redis
+      SPRING_REDIS_PORT: 6379
+    depends_on:
+      - mysql
+      - redis
+    networks:
+      - miniwallet-network
+
+  mysql:
+    image: mysql:8.1
+    container_name: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: mini_wallet
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    networks:
+      - miniwallet-network
+
+  redis:
+    image: redis:7
+    container_name: redis
+    ports:
+      - "6379:6379"
+    networks:
+      - miniwallet-network
+
+volumes:
+  mysql-data:
+
+networks:
+  miniwallet-network:
+    driver: bridge
