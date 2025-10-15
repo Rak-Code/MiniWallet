@@ -145,6 +145,8 @@ Let’s walk through the **main flow** of how things work in this project 👇
 
 ---
 
+![alt text](deepseek_mermaid_20251015_b7d422.png)
+
 ## 🧠 **How the Layers Work Together**
 
 ### 1. **Controller Layer**
