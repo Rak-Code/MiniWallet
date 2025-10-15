@@ -1,0 +1,948 @@
+{
+  "info": {
+    "name": "MiniWallet API Automated Tests",
+    "description": "Automated test scenarios for MiniWallet API testing using Newman/Postman collection runner",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "noauth"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080",
+      "type": "string"
+    },
+    {
+      "key": "customerId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "walletId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "secondWalletId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "transactionId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "transferId",
+      "value": "test-transfer-001",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Setup - Create Test Customer",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "if (pm.response.code !== 201) {",
+              "    pm.test('Status code is 201', function () {",
+              "        pm.response.to.have.status(201);",
+              "    });",
+              "}",
+              "",
+              "pm.test('Response has required fields', function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.have.property('id');",
+              "    pm.expect(jsonData).to.have.property('name');",
+              "    pm.expect(jsonData).to.have.property('email');",
+              "    pm.expect(jsonData).to.have.property('createdAt');",
+              "    pm.expect(jsonData).to.have.property('updatedAt');",
+              "});",
+              "",
+              "pm.test('Customer name and email are correct', function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData.name).to.eql('Test Customer');",
+              "    pm.expect(jsonData.email).to.eql('test.customer@example.com');",
+              "});",
+              "",
+              "// Store customer ID for later use",
+              "var jsonData = pm.response.json();",
+              "pm.collectionVariables.set('customerId', jsonData.id.toString());"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Test Customer\",\n  \"email\": \"test.customer@example.com\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/customers",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "customers"]
+        }
+      }
+    },
+    {
+      "name": "Setup - Create Second Test Customer",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "if (pm.response.code !== 201) {",
+              "    pm.test('Status code is 201', function () {",
+              "        pm.response.to.have.status(201);",
+              "    });",
+              "}",
+              "",
+              "pm.test('Response has required fields', function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.have.property('id');",
+              "    pm.expect(jsonData).to.have.property('name');",
+              "    pm.expect(jsonData).to.have.property('email');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Second Customer\",\n  \"email\": \"second.customer@example.com\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/customers",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "customers"]
+        }
+      }
+    },
+    {
+      "name": "Setup - Create Wallet for First Customer",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "if (pm.response.code !== 201) {",
+              "    pm.test('Status code is 201', function () {",
+              "        pm.response.to.have.status(201);",
+              "    });",
+              "}",
+              "",
+              "pm.test('Response has required fields', function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.have.property('id');",
+              "    pm.expect(jsonData).to.have.property('customerId');",
+              "    pm.expect(jsonData).to.have.property('balance');",
+              "    pm.expect(jsonData.balance).to.eql(0);",
+              "});",
+              "",
+              "// Store wallet ID for later use",
+              "var jsonData = pm.response.json();",
+              "pm.collectionVariables.set('walletId', jsonData.id.toString());"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/wallets?customerId={{customerId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "wallets"],
+          "query": [
+            {
+              "key": "customerId",
+              "value": "{{customerId}}"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Setup - Create Wallet for Second Customer",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "if (pm.response.code !== 201) {",
+              "    pm.test('Status code is 201', function () {",
+              "        pm.response.to.have.status(201);",
+              "    });",
+              "}",
+              "",
+              "pm.test('Response has required fields', function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.have.property('id');",
+              "    pm.expect(jsonData).to.have.property('balance');",
+              "    pm.expect(jsonData.balance).to.eql(0);",
+              "});",
+              "",
+              "// Store second wallet ID for later use",
+              "var jsonData = pm.response.json();",
+              "pm.collectionVariables.set('secondWalletId', jsonData.id.toString());"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/wallets?customerId=2",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "wallets"],
+          "query": [
+            {
+              "key": "customerId",
+              "value": "2"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Wallet Operations - Deposit Money",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "if (pm.response.code !== 201) {",
+              "    pm.test('Status code is 201', function () {",
+              "        pm.response.to.have.status(201);",
+              "    });",
+              "}",
+              "",
+              "pm.test('Transaction created successfully', function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.have.property('id');",
+              "    pm.expect(jsonData).to.have.property('walletId');",
+              "    pm.expect(jsonData).to.have.property('amount');",
+              "    pm.expect(jsonData).to.have.property('type');",
+              "    pm.expect(jsonData).to.have.property('status');",
+              "    pm.expect(jsonData.amount).to.eql(1000.50);",
+              "    pm.expect(jsonData.type).to.eql('CREDIT');",
+              "    pm.expect(jsonData.status).to.eql('COMPLETED');",
+              "    pm.expect(jsonData.reference).to.eql('Initial deposit');",
+              "});",
+              "",
+              "// Store transaction ID for later verification",
+              "var jsonData = pm.response.json();",
+              "pm.collectionVariables.set('transactionId', jsonData.id);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"amount\": 1000.50,\n  \"reference\": \"Initial deposit\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/wallets/{{walletId}}/deposit",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "wallets", "{{walletId}}", "deposit"]
+        }
+      }
+    },
+    {
+      "name": "Wallet Operations - Verify Wallet Balance After Deposit",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('Wallet balance updated correctly', function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData.balance).to.eql(1000.50);",
+              "    pm.expect(jsonData.customerId).to.eql(parseInt(pm.collectionVariables.get('customerId')));",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/wallets/{{walletId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "wallets", "{{walletId}}"]
+        }
+      }
+    },
+    {
+      "name": "Wallet Operations - Withdraw Money",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('Withdrawal transaction created successfully', function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData.amount).to.eql(250.75);",
+              "    pm.expect(jsonData.type).to.eql('DEBIT');",
+              "    pm.expect(jsonData.status).to.eql('COMPLETED');",
+              "    pm.expect(jsonData.reference).to.eql('ATM withdrawal');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"amount\": 250.75,\n  \"reference\": \"ATM withdrawal\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/wallets/{{walletId}}/withdraw",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "wallets", "{{walletId}}", "withdraw"]
+        }
+      }
+    },
+    {
+      "name": "Wallet Operations - Verify Wallet Balance After Withdrawal",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('Wallet balance updated correctly after withdrawal', function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData.balance).to.eql(749.75); // 1000.50 - 250.75",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/wallets/{{walletId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "wallets", "{{walletId}}"]
+        }
+      }
+    },
+    {
+      "name": "Wallet Operations - Deposit to Second Wallet",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 201', function () {",
+              "    pm.response.to.have.status(201);",
+              "});",
+              "",
+              "pm.test('Deposit transaction created successfully', function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData.amount).to.eql(500.00);",
+              "    pm.expect(jsonData.type).to.eql('CREDIT');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"amount\": 500.00,\n  \"reference\": \"Second wallet initial deposit\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/wallets/{{secondWalletId}}/deposit",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "wallets", "{{secondWalletId}}", "deposit"]
+        }
+      }
+    },
+    {
+      "name": "Wallet Operations - Transfer Money Between Wallets",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 201', function () {",
+              "    pm.response.to.have.status(201);",
+              "});",
+              "",
+              "pm.test('Transfer creates two transactions', function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.be.an('array');",
+              "    pm.expect(jsonData).to.have.length(2);",
+              "    ",
+              "    // Check first transaction (debit from source wallet)",
+              "    pm.expect(jsonData[0].type).to.eql('DEBIT');",
+              "    pm.expect(jsonData[0].amount).to.eql(100.00);",
+              "    pm.expect(jsonData[0].walletId).to.eql(parseInt(pm.collectionVariables.get('walletId')));",
+              "    pm.expect(jsonData[0].relatedWalletId).to.eql(parseInt(pm.collectionVariables.get('secondWalletId')));",
+              "    ",
+              "    // Check second transaction (credit to destination wallet)",
+              "    pm.expect(jsonData[1].type).to.eql('CREDIT');",
+              "    pm.expect(jsonData[1].amount).to.eql(100.00);",
+              "    pm.expect(jsonData[1].walletId).to.eql(parseInt(pm.collectionVariables.get('secondWalletId')));",
+              "    pm.expect(jsonData[1].relatedWalletId).to.eql(parseInt(pm.collectionVariables.get('walletId')));",
+              "    ",
+              "    // Both should have same transfer ID",
+              "    pm.expect(jsonData[0].transferId).to.eql(jsonData[1].transferId);",
+              "    pm.expect(jsonData[0].transferId).to.eql(pm.collectionVariables.get('transferId'));",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"fromWalletId\": {{walletId}},\n  \"toWalletId\": {{secondWalletId}},\n  \"amount\": 100.00,\n  \"transferId\": \"{{transferId}}\",\n  \"reference\": \"Payment for services\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/wallets/transfer",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "wallets", "transfer"]
+        }
+      }
+    },
+    {
+      "name": "Wallet Operations - Verify Balances After Transfer",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('First wallet balance updated correctly', function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData.balance).to.eql(649.75); // 749.75 - 100.00",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/wallets/{{walletId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "wallets", "{{walletId}}"]
+        }
+      }
+    },
+    {
+      "name": "Wallet Operations - Verify Second Wallet Balance After Transfer",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('Second wallet balance updated correctly', function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData.balance).to.eql(600.00); // 500.00 + 100.00",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/wallets/{{secondWalletId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "wallets", "{{secondWalletId}}"]
+        }
+      }
+    },
+    {
+      "name": "Transaction Management - Get Transaction by ID",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('Transaction details are correct', function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData.id).to.eql(pm.collectionVariables.get('transactionId'));",
+              "    pm.expect(jsonData.amount).to.eql(1000.50);",
+              "    pm.expect(jsonData.type).to.eql('CREDIT');",
+              "    pm.expect(jsonData.status).to.eql('COMPLETED');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/transactions/{{transactionId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "transactions", "{{transactionId}}"]
+        }
+      }
+    },
+    {
+      "name": "Transaction Management - Get Transactions by Wallet",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('Returns paginated results', function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.have.property('content');",
+              "    pm.expect(jsonData).to.have.property('totalElements');",
+              "    pm.expect(jsonData).to.have.property('totalPages');",
+              "    pm.expect(jsonData.content.length).to.be.at.least(1);",
+              "});",
+              "",
+              "pm.test('All transactions belong to the wallet', function () {",
+              "    var jsonData = pm.response.json();",
+              "    jsonData.content.forEach(function(transaction) {",
+              "        pm.expect(transaction.walletId).to.eql(parseInt(pm.collectionVariables.get('walletId')));",
+              "    });",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/transactions/by-wallet/{{walletId}}?page=0&size=10",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "transactions", "by-wallet", "{{walletId}}"],
+          "query": [
+            {
+              "key": "page",
+              "value": "0"
+            },
+            {
+              "key": "size",
+              "value": "10"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Transaction Management - Get Transactions by Reference",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('Returns transactions with matching reference', function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.be.an('array');",
+              "    jsonData.forEach(function(transaction) {",
+              "        pm.expect(transaction.reference).to.eql('Initial deposit');",
+              "    });",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/transactions/by-reference/Initial deposit",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "transactions", "by-reference", "Initial deposit"]
+        }
+      }
+    },
+    {
+      "name": "Transaction Management - Get Transactions by Transfer ID",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('Returns both transfer transactions', function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.be.an('array');",
+              "    pm.expect(jsonData).to.have.length(2);",
+              "    ",
+              "    jsonData.forEach(function(transaction) {",
+              "        pm.expect(transaction.transferId).to.eql(pm.collectionVariables.get('transferId'));",
+              "    });",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/transactions/by-transfer/{{transferId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "transactions", "by-transfer", "{{transferId}}"]
+        }
+      }
+    },
+    {
+      "name": "Transaction Management - Filter Transactions by Status and Type",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('Returns only completed credit transactions', function () {",
+              "    var jsonData = pm.response.json();",
+              "    jsonData.content.forEach(function(transaction) {",
+              "        pm.expect(transaction.status).to.eql('COMPLETED');",
+              "        pm.expect(transaction.type).to.eql('CREDIT');",
+              "    });",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/transactions/by-wallet/{{walletId}}?status=COMPLETED&type=CREDIT",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "transactions", "by-wallet", "{{walletId}}"],
+          "query": [
+            {
+              "key": "status",
+              "value": "COMPLETED"
+            },
+            {
+              "key": "type",
+              "value": "CREDIT"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Error Handling - Insufficient Funds",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code indicates error', function () {",
+              "    pm.expect(pm.response.code).to.be.oneOf([400, 422, 500]);",
+              "});",
+              "",
+              "pm.test('Error response structure', function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.have.property('error');",
+              "    pm.expect(jsonData).to.have.property('message');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"amount\": 10000.00,\n  \"reference\": \"Attempting large withdrawal\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/wallets/{{walletId}}/withdraw",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "wallets", "{{walletId}}", "withdraw"]
+        }
+      }
+    },
+    {
+      "name": "Error Handling - Customer Not Found",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code indicates not found', function () {",
+              "    pm.expect(pm.response.code).to.be.oneOf([404, 400]);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/customers/99999",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "customers", "99999"]
+        }
+      }
+    },
+    {
+      "name": "Error Handling - Wallet Not Found",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code indicates not found', function () {",
+              "    pm.expect(pm.response.code).to.be.oneOf([404, 400]);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/wallets/99999",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "wallets", "99999"]
+        }
+      }
+    },
+    {
+      "name": "Validation - Invalid Email Format",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code indicates validation error', function () {",
+              "    pm.expect(pm.response.code).to.be.oneOf([400, 422]);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Invalid Customer\",\n  \"email\": \"invalid-email\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/customers",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "customers"]
+        }
+      }
+    },
+    {
+      "name": "Validation - Negative Amount",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code indicates validation error', function () {",
+              "    pm.expect(pm.response.code).to.be.oneOf([400, 422]);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"amount\": -100.00,\n  \"reference\": \"Invalid negative amount\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/wallets/{{walletId}}/deposit",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "wallets", "{{walletId}}", "deposit"]
+        }
+      }
+    },
+    {
+      "name": "Cleanup - Delete Test Customers",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 204', function () {",
+              "    pm.response.to.have.status(204);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/customers/{{customerId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "customers", "{{customerId}}"]
+        }
+      }
+    },
+    {
+      "name": "Cleanup - Delete Second Test Customer",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 204', function () {",
+              "    pm.response.to.have.status(204);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/customers/2",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "customers", "2"]
+        }
+      }
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Global pre-request script",
+          "console.log('Starting test execution for MiniWallet API');",
+          "",
+          "// Ensure base URL is set",
+          "if (!pm.collectionVariables.get('baseUrl')) {",
+          "    pm.collectionVariables.set('baseUrl', 'http://localhost:8080');",
+          "}"
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Global test script",
+          "console.log('Test completed: ' + pm.info.requestName);"
+        ]
+      }
+    }
+  ]
+}

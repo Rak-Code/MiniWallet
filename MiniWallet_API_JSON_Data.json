@@ -1,0 +1,319 @@
+{
+  "MiniWallet_API_JSON_Data": {
+    "description": "JSON request/response examples for MiniWallet API testing in Postman",
+    "version": "1.0.0",
+    "base_url": "http://localhost:8080",
+
+    "Customer_Endpoints": {
+      "1_Create_Customer": {
+        "url": "/api/customers",
+        "method": "POST",
+        "description": "Create a new customer",
+        "request_headers": {
+          "Content-Type": "application/json"
+        },
+        "request_body": {
+          "name": "John Doe",
+          "email": "john.doe@example.com"
+        },
+        "expected_response": {
+          "id": 1,
+          "name": "John Doe",
+          "email": "john.doe@example.com",
+          "createdAt": "2024-01-15T10:30:00",
+          "updatedAt": "2024-01-15T10:30:00"
+        }
+      },
+
+      "2_Get_Customer": {
+        "url": "/api/customers/1",
+        "method": "GET",
+        "description": "Get customer by ID",
+        "expected_response": {
+          "id": 1,
+          "name": "John Doe",
+          "email": "john.doe@example.com",
+          "createdAt": "2024-01-15T10:30:00",
+          "updatedAt": "2024-01-15T10:30:00"
+        }
+      },
+
+      "3_Update_Customer": {
+        "url": "/api/customers/1",
+        "method": "PUT",
+        "description": "Update customer information",
+        "request_headers": {
+          "Content-Type": "application/json"
+        },
+        "request_body": {
+          "name": "John Smith",
+          "email": "john.smith@example.com"
+        },
+        "expected_response": {
+          "id": 1,
+          "name": "John Smith",
+          "email": "john.smith@example.com",
+          "createdAt": "2024-01-15T10:30:00",
+          "updatedAt": "2024-01-15T11:00:00"
+        }
+      }
+    },
+
+    "Wallet_Endpoints": {
+      "4_Create_Wallet": {
+        "url": "/api/wallets?customerId=1",
+        "method": "POST",
+        "description": "Create wallet for customer",
+        "expected_response": {
+          "id": 1,
+          "customerId": 1,
+          "balance": 0.00,
+          "version": 0,
+          "createdAt": "2024-01-15T10:35:00",
+          "updatedAt": "2024-01-15T10:35:00"
+        }
+      },
+
+      "5_Get_Wallet": {
+        "url": "/api/wallets/1",
+        "method": "GET",
+        "description": "Get wallet by ID",
+        "expected_response": {
+          "id": 1,
+          "customerId": 1,
+          "balance": 1000.00,
+          "version": 1,
+          "createdAt": "2024-01-15T10:35:00",
+          "updatedAt": "2024-01-15T11:00:00"
+        }
+      },
+
+      "6_Get_Wallet_By_Customer": {
+        "url": "/api/wallets/by-customer/1",
+        "method": "GET",
+        "description": "Get wallet by customer ID",
+        "expected_response": {
+          "id": 1,
+          "customerId": 1,
+          "balance": 1000.00,
+          "version": 1,
+          "createdAt": "2024-01-15T10:35:00",
+          "updatedAt": "2024-01-15T11:00:00"
+        }
+      },
+
+      "7_Deposit_Money": {
+        "url": "/api/wallets/1/deposit",
+        "method": "POST",
+        "description": "Deposit money to wallet",
+        "request_headers": {
+          "Content-Type": "application/json"
+        },
+        "request_body": {
+          "amount": 500.00,
+          "reference": "DEP-001"
+        },
+        "expected_response": {
+          "id": "TXN-001",
+          "walletId": 1,
+          "amount": 500.00,
+          "type": "DEPOSIT",
+          "status": "COMPLETED",
+          "transferId": null,
+          "relatedWalletId": null,
+          "reference": "DEP-001",
+          "createdAt": "2024-01-15T11:05:00"
+        }
+      },
+
+      "8_Withdraw_Money": {
+        "url": "/api/wallets/1/withdraw",
+        "method": "POST",
+        "description": "Withdraw money from wallet",
+        "request_headers": {
+          "Content-Type": "application/json"
+        },
+        "request_body": {
+          "amount": 200.00,
+          "reference": "WD-001"
+        },
+        "expected_response": {
+          "id": "TXN-002",
+          "walletId": 1,
+          "amount": 200.00,
+          "type": "WITHDRAWAL",
+          "status": "COMPLETED",
+          "transferId": null,
+          "relatedWalletId": null,
+          "reference": "WD-001",
+          "createdAt": "2024-01-15T11:10:00"
+        }
+      },
+
+      "9_Transfer_Money": {
+        "url": "/api/wallets/transfer",
+        "method": "POST",
+        "description": "Transfer money between wallets",
+        "request_headers": {
+          "Content-Type": "application/json"
+        },
+        "request_body": {
+          "fromWalletId": 1,
+          "toWalletId": 2,
+          "amount": 100.00,
+          "transferId": "TRANSFER-001",
+          "reference": "Payment for services"
+        },
+        "expected_response": [
+          {
+            "id": "TXN-003",
+            "walletId": 1,
+            "amount": 100.00,
+            "type": "WITHDRAWAL",
+            "status": "COMPLETED",
+            "transferId": "TRANSFER-001",
+            "relatedWalletId": 2,
+            "reference": "Payment for services",
+            "createdAt": "2024-01-15T11:15:00"
+          },
+          {
+            "id": "TXN-004",
+            "walletId": 2,
+            "amount": 100.00,
+            "type": "DEPOSIT",
+            "status": "COMPLETED",
+            "transferId": "TRANSFER-001",
+            "relatedWalletId": 1,
+            "reference": "Payment for services",
+            "createdAt": "2024-01-15T11:15:00"
+          }
+        ]
+      }
+    },
+
+    "Transaction_Endpoints": {
+      "10_Get_Transaction": {
+        "url": "/api/transactions/TXN-001",
+        "method": "GET",
+        "description": "Get transaction by ID",
+        "expected_response": {
+          "id": "TXN-001",
+          "walletId": 1,
+          "amount": 500.00,
+          "type": "DEPOSIT",
+          "status": "COMPLETED",
+          "transferId": null,
+          "relatedWalletId": null,
+          "reference": "DEP-001",
+          "createdAt": "2024-01-15T11:05:00"
+        }
+      },
+
+      "11_Get_Transactions_By_Wallet": {
+        "url": "/api/transactions/by-wallet/1",
+        "method": "GET",
+        "description": "Get all transactions for a wallet",
+        "query_parameters": {
+          "page": 0,
+          "size": 20
+        },
+        "expected_response": {
+          "content": [
+            {
+              "id": "TXN-001",
+              "walletId": 1,
+              "amount": 500.00,
+              "type": "DEPOSIT",
+              "status": "COMPLETED",
+              "reference": "DEP-001",
+              "createdAt": "2024-01-15T11:05:00"
+            }
+          ],
+          "totalElements": 1,
+          "totalPages": 1,
+          "size": 20,
+          "number": 0
+        }
+      },
+
+      "12_Get_Transactions_By_Reference": {
+        "url": "/api/transactions/by-reference/DEP-001",
+        "method": "GET",
+        "description": "Get transactions by reference",
+        "expected_response": [
+          {
+            "id": "TXN-001",
+            "walletId": 1,
+            "amount": 500.00,
+            "type": "DEPOSIT",
+            "status": "COMPLETED",
+            "reference": "DEP-001",
+            "createdAt": "2024-01-15T11:05:00"
+          }
+        ]
+      },
+
+      "13_Get_Transactions_By_Transfer": {
+        "url": "/api/transactions/by-transfer/TRANSFER-001",
+        "method": "GET",
+        "description": "Get transactions by transfer ID",
+        "expected_response": [
+          {
+            "id": "TXN-003",
+            "walletId": 1,
+            "amount": 100.00,
+            "type": "WITHDRAWAL",
+            "status": "COMPLETED",
+            "transferId": "TRANSFER-001",
+            "reference": "Payment for services",
+            "createdAt": "2024-01-15T11:15:00"
+          },
+          {
+            "id": "TXN-004",
+            "walletId": 2,
+            "amount": 100.00,
+            "type": "DEPOSIT",
+            "status": "COMPLETED",
+            "transferId": "TRANSFER-001",
+            "reference": "Payment for services",
+            "createdAt": "2024-01-15T11:15:00"
+          }
+        ]
+      }
+    },
+
+    "Error_Responses": {
+      "Resource_Not_Found": {
+        "status": 404,
+        "error": "Resource Not Found",
+        "message": "Customer not found with id: 999",
+        "timestamp": "2024-01-15T12:00:00"
+      },
+
+      "Insufficient_Funds": {
+        "status": 400,
+        "error": "Insufficient Funds",
+        "message": "Insufficient funds in wallet",
+        "timestamp": "2024-01-15T12:00:00"
+      },
+
+      "Duplicate_Resource": {
+        "status": 409,
+        "error": "Duplicate Resource",
+        "message": "Customer with this email already exists",
+        "timestamp": "2024-01-15T12:00:00"
+      },
+
+      "Bad_Request": {
+        "status": 400,
+        "error": "Bad Request",
+        "message": "Validation failed",
+        "details": [
+          "Email format is invalid",
+          "Amount must be greater than 0"
+        ],
+        "timestamp": "2024-01-15T12:00:00"
+      }
+    }
+  }
+}
